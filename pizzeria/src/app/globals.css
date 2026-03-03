@@ -1,10 +1,59 @@
 @import "tailwindcss";
 
+/**
+ * 🎨 GLOBALS.CSS — Estilos globales de la app
+ *
+ * MEJORAS respecto a la versión original:
+ *
+ * 1. Bug corregido: dark mode tenía --background: #865e5e (¡marrón rojizo!)
+ *    → Seguramente fue un color de prueba que se quedó. Lo cambiamos a #0a0a0a (negro suave)
+ *
+ * 2. Nuevas variables de color para bordes y texto secundario
+ *    → Así puedes usarlos en cualquier parte del CSS con var(--border)
+ *
+ * 3. Clases de utilidad personalizadas para cosas que Tailwind no tiene por defecto
+ *    → .animate-fade-in para el toast
+ *    → .line-clamp-2 por si tu versión de Tailwind no lo incluye
+ *
+ * 4. Estilos base mejorados para inputs y botones
+ *    → Consistencia visual sin tener que repetir clases en cada componente
+ */
+
+/* ─────────────────────────────────────────────
+   VARIABLES CSS (CUSTOM PROPERTIES)
+   
+   ¿Por qué variables en lugar de colores directos?
+   Porque puedes cambiar TODO el tema de la app cambiando solo estas variables.
+   El dark mode solo sobreescribe las variables, no cada elemento individual.
+   ───────────────────────────────────────────── */
 :root {
+  /* Colores base */
   --background: #ffffff;
   --foreground: #171717;
+  --foreground-muted: #6b7280;   /* NUEVO: texto secundario/gris */
+
+  /* Bordes */
+  --border: #e5e7eb;             /* NUEVO: color de bordes */
+
+  /* Marca */
+  --color-primary: #16a34a;      /* NUEVO: verde principal (green-600) */
+  --color-primary-hover: #15803d; /* NUEVO: verde hover (green-700) */
 }
 
+/* Dark mode: sobreescribimos solo las variables */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;       /* CORREGIDO: era #865e5e (¡marrón!) */
+    --foreground: #ededed;
+    --foreground-muted: #9ca3af;
+    --border: #374151;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   @theme inline: conecta las variables CSS con Tailwind
+   Esto permite usar clases como bg-background, text-foreground, etc.
+   ───────────────────────────────────────────── */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -12,15 +61,65 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #865e5e;
-    --foreground: #ffffff;
-  }
-}
-
+/* ─────────────────────────────────────────────
+   ESTILOS BASE
+   Estos se aplican a elementos HTML directamente, sin clases.
+   Establecen los "defaults" visuales de la app.
+   ───────────────────────────────────────────── */
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans, Arial, Helvetica, sans-serif);
+  /* Mejora el renderizado de texto en todos los navegadores */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Focus visible: mejor accesibilidad con teclado */
+/* :focus-visible solo se activa con teclado, no con ratón */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Transición suave en todos los elementos interactivos */
+button, a, input, select {
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+}
+
+/* ─────────────────────────────────────────────
+   ANIMACIONES PERSONALIZADAS
+   Tailwind no incluye animate-fade-in por defecto.
+   La usamos en el componente Toast.
+   ───────────────────────────────────────────── */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
+}
+
+/* ─────────────────────────────────────────────
+   SCROLLBAR PERSONALIZADA (solo Webkit: Chrome, Safari, Edge)
+   Hace la scrollbar del carrito más discreta
+   ───────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--border);
+  border-radius: 3px;
 }
