@@ -33,12 +33,7 @@ import { supabase } from "@/lib/supabase";
  *    → Actualizamos el estado local inmediatamente sin esperar a refetch
  */
 
-// ─────────────────────────────────────────────
-// CONFIGURACIÓN: emails que tienen acceso a /admin
-// En producción esto estaría en una tabla "roles" en Supabase,
-// pero para aprender, una lista simple es suficiente.
-// ─────────────────────────────────────────────
-const ADMIN_EMAILS = ["admin@pizzeria.com", "alejandrobl0819@gmail.com"]; // 👈 cambia esto por tu email
+
 
 // ─────────────────────────────────────────────
 // ESTADO INICIAL del formulario
@@ -78,17 +73,24 @@ export default function AdminPage() {
   // una segunda capa: verificamos que el usuario sea admin.
   // ─────────────────────────────────────────────
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(async ({ data }) => {
       const currentUser = data.session?.user;
       if (!currentUser) {
         router.push("/auth/login");
         return;
       }
-      if (!ADMIN_EMAILS.includes(currentUser.email)) {
-        // No es admin: redirige al menú principal
+      
+      const { data: admin } = await supabase
+        .from("admins")
+        .select("email")
+        .eq("email", currentUser.email)
+        .single();
+
+      if (!admin) {
         router.push("/");
         return;
       }
+      
       setUser(currentUser);
       setAuthLoading(false);
     });
@@ -289,7 +291,7 @@ export default function AdminPage() {
       )}
 
       {/* Header */}
-      <header className="flex items-center justify-between mb-10 border-b border-zinc-800 pb-6">
+      <header className="flex items-center justifyOleida0109-between mb-10 border-b border-zinc-800 pb-6">
         <div>
           <h1 className="text-3xl font-bold text-white">Panel Admin 🛠️</h1>
           <p className="text-zinc-400 text-sm mt-1">
@@ -332,7 +334,7 @@ export default function AdminPage() {
                   type="text"
                   name="name"           /* 👈 debe coincidir con la clave en EMPTY_FORM */
                   value={form.name}
-                  onChange={handleFormChange}
+                  onChange={handleFormChange}Oleida0109
                   placeholder="Pizza Margarita"
                   className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-white placeholder-zinc-500
                              focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-colors"
